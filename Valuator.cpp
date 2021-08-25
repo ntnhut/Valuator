@@ -1,20 +1,21 @@
+#include "Valuator.h"
 #include "Expression.h"
 #include "Addition.h"
 #include "Subtraction.h"
 #include "Multiplication.h"
 #include "Division.h"
-#include <iostream>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/foreach.hpp>
 
-namespace pt = boost::property_tree;
+//! @brief: create the expression given an xml structure 
+Expression* Valuator::createExpression(const boost::property_tree::ptree::value_type& v) {
 
-Expression* Valuator::createExpression(const pt::ptree::value_type& v) {
+    // if the field has no child, it contains only the constant
+    // for example <item>3</item>
     if (v.second.empty()) {
         Constant* c = new Constant(std::stoi(v.second.data()));
         return c;
     }
+    // <addition>...</addition>
     if (v.first == "addition") {
         Addition* a = new Addition(v);
         return a;
@@ -30,27 +31,9 @@ Expression* Valuator::createExpression(const pt::ptree::value_type& v) {
     } else if (v.first == "division") {
         Division* d = new Division(v);
         return d;
-    } 
+    }
+    // if the child is another expression 
+    // for example <item><subtraction>...</subtraction></item>
     auto subexp = v.second.get_child("").front();
     return createExpression(subexp);
-}
-
-int main(int argc, char *argv[]) {
-
-    pt::ptree inputTree;
-    pt::ptree outputTree;
-    pt::read_xml(argv[1], inputTree);
-
-    BOOST_FOREACH(pt::ptree::value_type &v, inputTree.get_child("expressions")) {
-    
-        std::string id = v.second.get_child("<xmlattr>.id").data();
-        Expression* e = Valuator::createExpression(v);
-        if (e!=nullptr) {
-            pt::ptree& result = outputTree.add("expressions.result", e->value());
-            result.put("<xmlattr>.id", id);
-        }
-        delete e;
-    }
-
-    pt::write_xml(argv[2], outputTree);
 }

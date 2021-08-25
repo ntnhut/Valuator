@@ -1,5 +1,5 @@
 #include "Expression.h"
-#include "Valuator.h"
+#include <boost/property_tree/ptree.hpp>
 
 class Addition : public Expression {
 public:
@@ -9,7 +9,9 @@ public:
     Addition(const boost::property_tree::ptree::value_type& v);
     ~Addition();
     int value() const;
-    void addItem(const Expression* exp) { _items.push_back(exp); }
+    void addItem(const Expression* exp) {
+        _items.push_back(exp); 
+    }
 private:
     int _id;
     bool _complex;

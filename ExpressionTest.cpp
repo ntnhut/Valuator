@@ -17,76 +17,74 @@ int main() {
     Constant nine(9);
     Constant ten(10);
     {
-        Addition s(2,false);
-        s.addItem(&one);
-        s.addItem(&two);
-        if (s.value()!=3) {
-            std::cout<<"result of 1+2 should be 3, received "<< s.value() <<"\n";
+        Addition a;
+        a.addItem(&one);
+        a.addItem(&two);
+        const int answer = one.value() + two.value();
+        if (a.value() != answer) {
+            std::cout << "result of 1+2 should be " << answer << ", received " << a.value() << "\n";
         }
     }
     {
-        Subtraction su(3,false);
-        su.setMinuend(&two);
-        su.setSubtrahend(&one);
-        if (su.value()!=1) {
-            std::cout<<"result of 2-1 should be 1, received "<<su.value() <<"\n";
+        Subtraction s;
+        s.setMinuend(&two);
+        s.setSubtrahend(&one);
+        const int answer = two.value() - one.value();
+        if (s.value() != answer) {
+            std::cout<<"result of 2-1 should be " << answer << ", received " << s.value() << "\n";
         }
     }
     {
-        Multiplication m(4, false);
-        
+        Multiplication m;        
         m.addFactor(&two);
         m.addFactor(&five);
-        if (m.value()!=10) {
-            std::cout<<"result of 2*5 should 10, received "<<m.value() <<"\n";
+        const int answer = two.value() * five.value();
+        if (m.value() != answer) {
+            std::cout<<"result of 2*5 should be " << answer << ", received " << m.value() <<"\n";
         }
     }    
     {
-        Division d(5, false);
+        Division d;
         d.setDividend(&ten);
         d.setDivisor(&two);
-        if (d.value()!=5) {
-            std::cout<<"result of 10/2 should be 5, received "<<d.value() <<"\n";
+        const int answer = ten.value() / two.value();
+        if (d.value() != answer) {
+            std::cout<<"result of 10/2 should be " << answer << ", received "<< d.value() <<"\n";
         }
     }
     {
-        Addition a(10, true);
+        Addition a;
         a.addItem(&two);
-        Subtraction s(11, false);
+        Subtraction s;
         s.setMinuend(&nine);
         s.setSubtrahend(&six);
         a.addItem(&s);
-        if (a.value()!=5) {
-            std::cout<< "result of 2+(9-6) should be 5, received " << a.value() << "\n";
+        const int answer = two.value() + (nine.value() - six.value());
+        if (a.value() != answer) {
+            std::cout<< "result of 2+(9-6) should be " << answer << ", received " << a.value() << "\n";
         }
     }
     {
-        Multiplication m(13, true);
-        Addition a(21, false);
+        Multiplication m;
+        Addition a;
         a.addItem(&two);
         a.addItem(&three);
         a.addItem(&four);
         m.addFactor(&a);
         m.addFactor(&six);
-        Multiplication mm(100, false);
-        mm.addFactor(&three);
-        mm.addFactor(&four);
-        mm.addFactor(&five);
-        mm.addFactor(&ten);
+        Multiplication m2;
+        m2.addFactor(&three);
+        m2.addFactor(&four);
+        m2.addFactor(&five);
+        m2.addFactor(&ten);
         Constant fivesix(56);
-        mm.addFactor(&fivesix);
-        m.addFactor(&mm);
-        if (m.value()!=1814400) {
-            std::cout<< "result of (2+3+4)*6*(3*4*5*10*56) should be 1814400, received " << m.value() << "\n";
+        m2.addFactor(&fivesix);
+        m.addFactor(&m2);
+        const int factora = two.value() + three.value() + four.value();
+        const int factorm2 = three.value() * four.value() * five.value() * ten.value() * fivesix.value();
+        const int answer = factora * six.value() * factorm2;
+        if (m.value() != answer) {
+            std::cout<< "result of (2+3+4)*6*(3*4*5*10*56) should be " << answer << ", received " << m.value() << "\n";
         }
-    }
-    {
-        Addition* a = new Addition();
-        Constant* oneseven = new Constant(177);
-        a->addItem(oneseven);
-        Expression* e = a;
-        std::cout<< e->value();
-        delete oneseven;
-        delete a;
     }
 }
