@@ -1,0 +1,26 @@
+// template <typename T>
+#ifndef EXPRESSION_H
+#define EXPRESSION_H
+
+#include<vector>
+// #include <boost/property_tree/ptree.hpp>
+#include <iostream>
+// namespace pt = boost::property_tree;
+
+class Expression {
+public:
+    virtual int value() const { return 0; }  
+};
+
+class Constant : public Expression {
+public:
+    Constant(const int v=0) : _value(v) {}
+    void setValue(const int v) {
+        _value = v;
+    }
+    int value() const { return _value; }
+private:
+    int _value;
+};
+
+#endif
