@@ -5,6 +5,9 @@
 #include "Multiplication.h"
 #include "Division.h"
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
+namespace pt = boost::property_tree;
 
 //! @brief: create the expression given an xml structure 
 Expression* Valuator::createExpression(const boost::property_tree::ptree::value_type& v) {
@@ -36,4 +39,23 @@ Expression* Valuator::createExpression(const boost::property_tree::ptree::value_
     // for example <item><subtraction>...</subtraction></item>
     auto subexp = v.second.get_child("").front();
     return createExpression(subexp);
+}
+
+void Valuator::evaluate(const std::string& inputFileName, const std::string& outputFileName) {
+    pt::ptree inputTree;
+    pt::read_xml(inputFileName, inputTree);
+
+    pt::ptree outputTree;
+    for (pt::ptree::value_type &v : inputTree.get_child("expressions")) {
+
+        std::string id = v.second.get_child("<xmlattr>.id").data();
+        Expression* e = Valuator::createExpression(v);
+        if (e != nullptr) {
+            pt::ptree& result = outputTree.add("expressions.result", e->value());
+            result.put("<xmlattr>.id", id);
+        }  
+        delete e;
+    }
+
+    pt::write_xml(outputFileName, outputTree);
 }
