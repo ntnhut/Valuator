@@ -1,13 +1,59 @@
 #include "Valuator.h"
-#include "Expression.h"
-#include "Addition.h"
-#include "Subtraction.h"
-#include "Multiplication.h"
-#include "Division.h"
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 namespace pt = boost::property_tree;
+
+Addition* Valuator::createAddition(const boost::property_tree::ptree::value_type& v) {
+    Addition* a = new Addition;
+    for (const boost::property_tree::ptree::value_type &w : v.second.get_child("")) {
+        if (w.first == "item") {
+            Expression* e = createExpression(w);
+            a->addItem(e);
+        }
+    }
+    return a;
+}
+
+
+Division* Valuator::createDivision(const boost::property_tree::ptree::value_type& v) {
+    Division* d = new Division;
+    for (const boost::property_tree::ptree::value_type &w : v.second.get_child("")) {
+        if (w.first == "dividend") {
+            Expression* e = createExpression(w);
+            d->setDividend(e);
+        } else if (w.first == "divisor") {
+            Expression* e = createExpression(w);
+            d->setDivisor(e);
+        }   
+    }
+    return d;
+}
+
+
+Multiplication* Valuator::createMultiplication(const boost::property_tree::ptree::value_type& v) {
+    Multiplication* m = new Multiplication;
+    for (const boost::property_tree::ptree::value_type &w : v.second.get_child("")) {
+        if (w.first == "factor") {
+            Expression* e = createExpression(w);
+            m->addFactor(e);
+        }    
+    }
+    return m;
+}
+
+Subtraction* Valuator::createSubtraction(const boost::property_tree::ptree::value_type& v) {
+    Subtraction* s = new Subtraction;
+    for (const boost::property_tree::ptree::value_type &w : v.second.get_child("")) {
+        if (w.first == "minuend") {
+            Expression* e = createExpression(w);
+            s->setMinuend(e);
+        } else if (w.first == "subtrahend") {
+            Expression* e = createExpression(w);
+            s->setSubtrahend(e);
+        }    
+    }
+    return s;
+}
 
 //! @brief: create the expression given an xml structure 
 Expression* Valuator::createExpression(const boost::property_tree::ptree::value_type& v) {
@@ -15,25 +61,20 @@ Expression* Valuator::createExpression(const boost::property_tree::ptree::value_
     // if the field has no child, it contains only the constant
     // for example <item>3</item>
     if (v.second.empty()) {
-        Constant* c = new Constant(std::stoi(v.second.data()));
-        return c;
+        return new Constant(std::stoi(v.second.data()));
     }
     // <addition>...</addition>
     if (v.first == "addition") {
-        Addition* a = new Addition(v);
-        return a;
+        return createAddition(v);
 
     } else if (v.first == "subtraction") {
-        Subtraction* s = new Subtraction(v);
-        return s;
+        return createSubtraction(v);
 
     } else if (v.first == "multiplication") {
-        Multiplication* m = new Multiplication(v);
-        return m;
+        return createMultiplication(v);
 
     } else if (v.first == "division") {
-        Division* d = new Division(v);
-        return d;
+        return createDivision(v);
     }
     // if the child is another expression 
     // for example <item><subtraction>...</subtraction></item>
@@ -53,8 +94,8 @@ void Valuator::evaluate(const std::string& inputFileName, const std::string& out
         if (e != nullptr) {
             pt::ptree& result = outputTree.add("expressions.result", e->value());
             result.put("<xmlattr>.id", id);
+            delete e;
         }  
-        delete e;
     }
 
     pt::write_xml(outputFileName, outputTree);

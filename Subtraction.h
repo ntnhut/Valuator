@@ -1,12 +1,13 @@
 #include "Expression.h"
-#include "Valuator.h"
 
 class Subtraction : public Expression {
 public:
-    Subtraction(const int id=0, const bool complex=false): _id(id), _complex(complex) {}
-    Subtraction(const boost::property_tree::ptree::value_type& v);
+    Subtraction() {}
     ~Subtraction();
     int value() const { 
+        if (_minuend==nullptr || _subtrahend==nullptr) {
+            return 0;
+        }
         return _minuend->value() - _subtrahend->value(); 
     }
     void setMinuend(const Expression* m) { 
@@ -17,8 +18,6 @@ public:
     }
 
 private:
-    int _id;
-    bool _complex;
     const Expression* _minuend;
     const Expression* _subtrahend;
 };
